@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>პროდუქტის მენეჯმენტი</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="container">
+    <h1>საწყობის საიტი</h1>
+    <div class="form-group">
+        <label for="searchInput">ჩაწერეთ პროდუქტის კოდი:</label>
+        <input type="text" id="searchInput" placeholder="...">
+    </div>
+    <div id="productInfo"></div>
+    <form id="productForm">
+        <div class="form-group">
+            <label for="productName">პროდუქტის სახელი:</label>
+            <input type="text" id="productName" name="productName" required>
+        </div>
+        <div class="form-group">
+            <label for="productCode">პროდუქტის კოდი:</label>
+            <input type="text" id="productCode" name="productCode" required>
+        </div>
+        <div class="form-group">
+            <label for="productType">პროდუქტის ტიპი:</label>
+            <select id="productType" name="productType">
+                <option value="ჭიქა">ჭიქა</option>
+                <option value="თეფში">თეფში</option>
+                <option value="დოქი">დოქი</option>
+                <!-- სხვა ვარიანტები დაემატეთ რეალურ დანარჩენებებს -->
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="productMaterial">პროდუქტის მასალა:</label>
+            <select id="productMaterial" name="productMaterial">
+                <option value="glass">შუშა</option>
+                <option value="iron">რკინა</option>
+                <option value="plastic">სხვა</option>
+                <!-- სხვა ვარიანტები დაემატეთ რეალურ დანარჩენებებს -->
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="productDescription">პროდუქტის ფასი:</label>
+            <textarea id="productDescription" name="productDescription" rows="4" cols="50"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="productImage">პროდუქტის ფოტო:</label>
+            <input type="file" id="productImage" name="productImage" accept="image/*" required>
+        </div>
+        <button type="submit">ატვირთეთ პროდუქტის ფოტო</button>
+    </form>
+</div>
+
+<script>
+// პროდუქტების ნაგულისხმების მასივი (შეცვალეთ ნებისმიერი მონაცემით)
+var products = [
+    { code: "123456", name: "ჭიქა", type: "ჭიქა", material: "შუშა", description: "სართულის ფარიანტი", image: "cup.jpg" },
+    { code: "654321", name: "თეფში", type: "თეფში", material: "რკინა", description: "ფარმაციული მასალა", image: "plate.jpg" }
+    // დაამატეთ სხვა პროდუქტები როგორც საჭიროა
+];
+
+// ფუნქცია პროდუქტის ძებნისთვის კოდის მიხედვით
+function searchProduct(code) {
+    for (var i = 0; i < products.length; i++) {
+        if (products[i].code === code) {
+            return products[i];
+        }
+    }
+    return null;
+}
+
+// ფუნქცია პროდუქტის ინფორმაციის გამოტანისთვის
+function displayProduct(product) {
+    var productInfoDiv = document.getElementById("productInfo");
+    if (product) {
+        productInfoDiv.innerHTML = `
+            <h2>${product.name}</h2>
+            <p><strong>პროდუქტის კოდი:</strong> ${product.code}</p>
+            <p><strong>ტიპი:</strong> ${product.type}</p>
+            <p><strong>მასალა:</strong> ${product.material}</p>
+            <p><strong>აღწერა:</strong> ${product.description}</p>
+            <img src="${product.image}" alt="${product.name}">
+        `;
+    } else {
+        productInfoDiv.innerHTML = "პროდუქტი ვერ მოიძებნა.";
+    }
+}
+
+// ფუნქცია ფორმის გაგზავნის მიღებისთვის
+function handleFormSubmission(event) {
+    event.preventDefault();
+
+    // მიიღეთ ფორმის მნიშვნელობები
+    var productName = document.getElementById("productName").value;
+    var productCode = document.getElementById("productCode").value;
+    var productType = document.getElementById("productType").value;
+    var productMaterial = document.getElementById("productMaterial").value;
+    var productDescription = document.getElementById("productDescription").value;
+    var productImage = document.getElementById("productImage").files[0];
+
+    // შეამოწმეთ, რომ არსებობს თურქვეული კოდის პროდუქტი უკვე
+    var existingProduct = searchProduct(productCode);
+    if (existingProduct) {
+        alert("პროდუქტი უკვე არსებობს ამ კოდით.");
+    } else {
+        // გადაამზადეთ სერვერზე შენახვა (რეალურ მომსახურებაზე შეცვალეთ შესაბამისი კოდი)
+        var product = {
+            name: productName,
+            code: productCode,
+            type: productType,
+            material: productMaterial,
+            description: productDescription,
+            image: productImage ? productImage.name : "" // დაფაილის სახელის შენახვა
+        };
+        products.push(product); // ახალი პროდუქტის დამატება მასივში
+
+        // გამოჩნდეს წარმატებული შეტყობინება
+        alert("პროდუქტი წარმატებით დაემატა!");
+
+        // ფორმის გასუფთავება
+        document.getElementById("productForm").reset();
+        
+        // განახლეთ ძიების ფუნქციონალი
+        updateSearchFunctionality();
+    }
+}
+
+// ფუნქცია ძიების ფუნქციონალის განახლებათვის
+function updateSearchFunctionality() {
+    var searchInput = document.getElementById("searchInput");
+    searchInput.addEventListener("input", function(event) {
+        var searchValue = event.target.value.trim();
+        if (searchValue.length > 0) {
+            var product = searchProduct(searchValue);
+            displayProduct(product);
+        } else {
+            document.getElementById("productInfo").innerHTML = "";
+        }
+    });
+}
+
+// ფორმის გაგზავნის ივენტლისტერის დამატება
+document.getElementById("productForm").addEventListener("submit", handleFormSubmission);
+
+// ძიების ფუნქციონალის ინიციალიზაცია
+updateSearchFunctionality();
+</script>
+
+</body>
+</html>
